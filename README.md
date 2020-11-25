@@ -1,2 +1,2 @@
-# TrafficSignalSystem
-Traffic signal system using Asp.net mvc C#
+# Traffic Signal System
+Traffic signal system using C#
