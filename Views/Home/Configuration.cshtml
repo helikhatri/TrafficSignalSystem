@@ -1,0 +1,105 @@
+﻿
+@{
+    ViewBag.Title = "Configuration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    td {
+        padding: 8px !important;
+    }
+
+    .row {
+        padding-top: 48px;
+        padding-bottom: 48px;
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<div class="row">
+    <div class="col-md-12">
+        <h2>Configuration Screen</h2>
+        <hr />
+    </div>
+
+    <div class="col-md-12">
+        <table border="0">
+            <tr>
+                <td>Time Duration</td>
+                <td><input type="number" id="intDuration" min="5" max="120" value="5" onkeyup="checkNumber()"/></td>
+            </tr>
+            <tr>
+                <td>Signal Rotation</td>
+                <td>
+                    <select id="drpSignalRotation">
+                        <option value="1" selected="selected">Clockwise </option>
+                        <option value="2">Anticlockwise </option>
+                        <option value="3">Up to down or Down to Up</option>
+                        <option value="4">Left to Right or Right to Left</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"> <input type="submit" onclick="InsertData()" class="btn btn-default"></td>
+            </tr>
+
+        </table>
+    </div>
+
+</div>
+<script>
+    function checkNumber()
+    {
+        var textWeight = $("input[type='number']#intDuration");
+
+        textWeight.change(function () {
+
+            var min = textWeight.attr("min");
+
+            var max = textWeight.attr("max");
+
+            var value = textWeight.val();
+
+            if (val < min || val > max) {
+                alert("Value shulud be between 5 to 120");
+
+                textWeight.val(min);
+            }
+
+        });
+    }
+    function InsertData() {
+        var intDuration = document.getElementById('intDuration').value;
+       var drpSignalRotation = document.getElementById('drpSignalRotation').value;
+        var strRotationType = $('#drpSignalRotation').find('option:selected').text();
+        if (intDuration < 5 || intDuration > 120) {
+            alert("Value shulud be between 5 to 120");
+            return;
+        }
+        var cls = {
+            intDurationId: intDuration,
+            intSignalRotation: drpSignalRotation,
+            strRotationType: strRotationType
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/Home/InsertData",
+            dataType: 'json',
+            data: cls,
+            success: function (data) {
+                if (data == "success") {
+                    window.location.href = "/Home/Index";
+                }
+               
+                else {
+                    alert("error");
+                }
+                ClearData();
+            },
+            error: function (xhr) {
+                alert(xhr);
+            }
+        });
+    }
+    </script>

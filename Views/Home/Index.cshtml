@@ -1,0 +1,270 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<style>
+    td {
+        padding: 8px;
+    }
+
+    .row {
+        padding-top: 48px;
+        padding-bottom: 48px;
+    }
+
+    .label {
+        color: white;
+        padding: 8px;
+        font-family: Arial;
+    }
+
+    .success {
+        background-color: #4CAF50;
+    }
+    /* Green */
+    .danger {
+        background-color: #f44336;
+    }
+    /* Red */
+    .current {
+        font-size: 20px;
+    }
+    .warning {
+        background-color: #ff9800;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <p>
+            <a class="btn btn-default" href="/Home/Configuration/" style="background-color: deepskyblue">Configure </a>
+        </p>
+        <hr />
+    </div>
+    <!-- Modal -->
+
+    <div class="col-md-12">
+
+        <table border="0">
+            <tr>
+                <td>Rotation Time</td>
+                <td>@(Session["duration"] != null ? Session["duration"] : 0)</td>
+            </tr>
+            <tr>
+                <td>Rotation Type</td>
+                <td>@(Convert.ToString(Session["strRotationType"]) !="" ? Session["strRotationType"] : "--")</td>
+            </tr>
+            <tr>
+                <td>Open Road</td>
+                <td><span id="openroad">@(Convert.ToString(Session["signalrotation"]) == "" ? "--": Convert.ToString(Session["signalrotation"]) == "4" ? "D" : "A")</span></td>
+            </tr>
+            <tr>
+                <td>Next Open Road</td>
+                <td><span id="nextroad">@(Convert.ToString(Session["signalrotation"]) != null && Convert.ToString(Session["signalrotation"]) == "3" ? "C" : Convert.ToString(Session["signalrotation"]) == "2"?"D" : "B")</span></td>
+            </tr>
+            <tr>
+                <td>Remain Time to Open Next Road</td>
+                <td><span id="countdown">@(Session["duration"] != null ? Session["duration"] : 0)</span></td>
+            </tr>
+        </table>
+
+        <hr />
+    </div>
+    <div class="col-md-6">
+        <h4 style="margin-top: 10px;">Current Road Indicator</h4>
+        <table border="0">
+            <tr>
+                <td></td>
+                <td colspan="3"><span class="current label @(Session["signalrotation"] != null && Convert.ToString(Session["signalrotation"]) == "4" ? "danger" : "success")" id="a">A</span></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><span class="current label @(Session["signalrotation"] != null && Convert.ToString(Session["signalrotation"]) != "4" ? "danger" : "success")" id="d">D</span></td>
+                <td></td>
+                <td colspan="3"><span class="current label danger" id="b">B</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="3"><span class="current label danger" id="c">C</span></td>
+            </tr>
+        </table>
+        <hr />
+    </div>
+    <div class="col-md-6">
+        <h4 style="margin-top: 10px;">Next Open Road Indicator</h4>
+        <table border="0">
+            <tr>
+                <td></td>
+                <td colspan="3"><span class="label danger next" id="nextA">A</span></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><span class="label @(Session["signalrotation"] != null && Convert.ToString(Session["signalrotation"]) == "2" ? "warning": "danger") next" id="nextD">D</span></td>
+                <td></td>
+                <td colspan="3"><span class="label @(Session["signalrotation"] != null && Convert.ToString(Session["signalrotation"]) == "1" ? "warning": Convert.ToString(Session["signalrotation"]) == "4"?"warning" : "danger") next" id="nextB">B</span></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="3"><span class="label @(Session["signalrotation"] != null && Convert.ToString(Session["signalrotation"]) == "3" ? "warning" : "danger") next" id="nextC">C</span></td>
+            </tr>
+        </table>
+        <hr />
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        autoTimer();
+        timer();
+    });
+
+</script>
+<script>
+    var duration = '@Session["duration"]' !=''?parseInt('@Session["duration"]'):0;
+    var signalrotation ='@Session["duration"]'!=''? parseInt('@Session["signalrotation"]'):0;
+    var a = 1; // For count next indicator
+    var openroad="";
+    var nextroad="";
+    var red =  "red";
+    var green = "green";
+    function timer() {
+        setInterval(autoTimer, (duration * 1000));
+        setInterval(getData, (duration * 1000));
+    }
+
+    function getData() {
+        if (signalrotation == 1)//check Rotation type
+        {
+            if (a == 1) {
+                $(".current").css({ 'background-color': red });
+                $('#b').css({ 'background-color': green });
+                a = 2;
+                nextIndicator("#nextC", "C");
+                openroad = "B";
+                nextroad = "C";
+            }
+            else if (a == 2) {
+                $(".current").css({ 'background-color': red });
+                $('#c').css({ 'background-color': green });
+                a = 3;
+                nextIndicator("#nextD", "D");
+                openroad = "C";
+                nextroad = "D";
+            }
+            else if (a == 3) {
+                $(".current").css({ 'background-color': red });
+                $('#d').css({ 'background-color': green });
+                a = 4;
+                nextIndicator("#nextA", "A");
+                openroad = "D";
+                nextroad = "A";
+            }
+            else if (a == 4) {
+                $(".current").css({ 'background-color': red });
+                $('#a').css({ 'background-color': green });
+                a = 1;
+                nextIndicator("#nextB", "B");
+                openroad = "A";
+                nextroad = "B";
+            }
+        }
+        if (signalrotation == 2)//check Rotation type
+        {
+            if (a == 1) {
+                $(".current").css({ 'background-color': red });
+                $('#d').css({ 'background-color': green });
+                a = 2;
+                nextIndicator("#nextC", "C");
+                openroad = "D";
+                nextroad = "C";
+            }
+            else if (a == 2) {
+                $(".current").css({ 'background-color': red });
+                $('#c').css({ 'background-color': green });
+                a = 3;
+                nextIndicator("#nextB", "B");
+                openroad = "C";
+                nextroad = "B";
+            }
+            else if (a == 3) {
+                $(".current").css({ 'background-color': red });
+                $('#b').css({ 'background-color': green });
+                a = 4;
+                nextIndicator("#nextA", "A");
+                openroad = "B";
+                nextroad = "A";
+            }
+            else if (a == 4) {
+                $(".current").css({ 'background-color': red });
+                $('#a').css({ 'background-color': green });
+                a = 1;
+                nextIndicator("#nextD", "D");
+                openroad = "A";
+                nextroad = "D";
+            }
+        }
+    if (signalrotation == 3) //check Rotation type
+    {
+        if (a == 1) {
+            $(".current").css({ 'background-color': red });
+            $('#c').css({ 'background-color': green });
+                a = 2;
+                nextIndicator("#nextA", "A");
+                openroad = "C";
+                nextroad = "A";
+            }
+        else if (a == 2) {
+            $(".current").css({ 'background-color': red });
+            $('#a').css({ 'background-color': green });
+                a = 1;
+                nextIndicator("#nextC", "C");
+                openroad = "A";
+                nextroad = "C";
+            }
+
+        }
+    if (signalrotation == 4)//check Rotation type
+    {
+        if (a == 1) {
+            $(".current").css({ 'background-color': red });
+            $('#b').css({ 'background-color': green });
+                a = 2;
+                nextIndicator("#nextD", "D");
+                openroad = "B";
+                nextroad = "D";
+            }
+        else if (a == 2) {
+            $(".current").css({ 'background-color': red });
+            $('#d').css({ 'background-color': green });
+                a = 1;
+                nextIndicator("#nextB", "B");
+                openroad = "D";
+                nextroad = "B";
+            }
+        }
+        document.getElementById("openroad").innerText = openroad; //display open road
+        document.getElementById("nextroad").innerText = nextroad; //display next road
+    }
+
+
+    function nextIndicator(id, text) {
+        //function For next road indicator
+        $(".next").css("background-color", "red");
+        $(id).css({ "background-color": "orange" });
+
+    }
+    function autoTimer() {
+        var dur = duration;
+        if (dur != '') {
+            var downloadTimer = setInterval(function () {
+                if (dur <= 0) {
+                    clearInterval(downloadTimer);
+                    document.getElementById("countdown").innerHTML = duration;
+                } else {
+                    document.getElementById("countdown").innerHTML = dur;
+                }
+                dur -= 1;
+            }, 1000);
+        }
+    }
+</script>
