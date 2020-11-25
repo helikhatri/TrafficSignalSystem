@@ -1,2 +1,2 @@
 # Traffic Signal System
-Traffic signal system using C#
+Traffic signal system with C#
